@@ -15,4 +15,5 @@ cat <<EOF > /etc/orchestrator.conf.json
 EOF
 fi
 
+tar zxf /orchestrator.tar.gz -C /usr/local/orchestrator
 exec /usr/local/orchestrator/orchestrator http

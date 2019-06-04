@@ -36,7 +36,8 @@ COPY . .
 RUN bash build.sh -b \
  && rsync -av $(find /tmp/orchestrator-release -type d -name orchestrator -maxdepth 2)/ / \
  && rsync -av $(find /tmp/orchestrator-release -type d -name orchestrator-cli -maxdepth 2)/ / \
- && cp /usr/local/orchestrator/orchestrator-sample-sqlite.conf.json /etc/orchestrator.conf.json
+ && cp /usr/local/orchestrator/orchestrator-sample-sqlite.conf.json /etc/orchestrator.conf.json \
+ && tar czf /orchestrator.tar.gz -C /usr/local/orchestrator .
 
 FROM alpine:3.8
 
@@ -47,8 +48,12 @@ RUN apk add --no-cache \
 
 EXPOSE 3000
 
-COPY --from=0 /usr/local/orchestrator /usr/local/orchestrator
+COPY --from=0 /orchestrator.tar.gz /orchestrator.tar.gz
 COPY --from=0 /etc/orchestrator.conf.json /etc/orchestrator.conf.json
+
+RUN mkdir /usr/local/orchestrator \
+ && chown 0:0 /usr/local/orchestrator \
+ && chmod 0775 /usr/local/orchestrator
 
 WORKDIR /usr/local/orchestrator
 ADD docker/entrypoint.sh /entrypoint.sh
