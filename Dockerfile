@@ -18,30 +18,32 @@ FROM alpine:3.8
 
 ENV GOPATH=/tmp/go
 
-RUN apk update
-RUN apk upgrade
-RUN apk add --update libcurl
-RUN apk add --update rsync
-RUN apk add --update gcc
-RUN apk add --update g++
-RUN apk add --update go
-RUN apk add --update build-base
-RUN apk add --update bash
-RUN apk add --update git
+RUN apk --no-cache update \
+ && apk --no-cache upgrade \
+ && apk add --update --no-cache \
+    libcurl \
+    rsync \
+    gcc \
+    g++ \
+    go \
+    build-base \
+    bash \
+    git
 
 RUN mkdir -p $GOPATH/src/github.com/github/orchestrator
 WORKDIR $GOPATH/src/github.com/github/orchestrator
 COPY . .
-RUN bash build.sh -b
-RUN rsync -av $(find /tmp/orchestrator-release -type d -name orchestrator -maxdepth 2)/ /
-RUN rsync -av $(find /tmp/orchestrator-release -type d -name orchestrator-cli -maxdepth 2)/ /
-RUN cp /usr/local/orchestrator/orchestrator-sample-sqlite.conf.json /etc/orchestrator.conf.json
+RUN bash build.sh -b \
+ && rsync -av $(find /tmp/orchestrator-release -type d -name orchestrator -maxdepth 2)/ / \
+ && rsync -av $(find /tmp/orchestrator-release -type d -name orchestrator-cli -maxdepth 2)/ / \
+ && cp /usr/local/orchestrator/orchestrator-sample-sqlite.conf.json /etc/orchestrator.conf.json
 
 FROM alpine:3.8
 
-RUN apk add --no-cache bash
-RUN apk add --no-cache curl
-RUN apk add --no-cache jq
+RUN apk add --no-cache \
+    bash \
+    curl \
+    jq
 
 EXPOSE 3000
 
